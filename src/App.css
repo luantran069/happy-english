@@ -62,6 +62,7 @@
   resize: vertical;
   min-height: 100px;
   font-size: 1rem;
+  width: 100%;
 }
 
 .paste-btn {
