@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import { GoogleGenAI } from '@google/genai'
+import { z } from 'zod'
+import { zodToJsonSchema } from 'zod-to-json-schema'
 
-interface CorrectionResult {
-  correctedText: string
-  wordUsage: string
-  explanation: string
-}
+// Define the schema for grammar correction response
+const correctionSchema = z.object({
+  correctedText: z.string().describe('The grammatically correct version of the sentence (simple and concise, remove unnecessary words)'),
+  wordUsage: z.string().describe('Identify words used incorrectly and explain the correct word type/usage'),
+  explanation: z.string().describe('Explain how to make the sentence correct')
+})
+
+type CorrectionResult = z.infer<typeof correctionSchema>
 
 function App() {
   const [apiKey, setApiKey] = useState<string>('')
@@ -64,44 +69,33 @@ function App() {
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey })
 
-      const prompt = `You are an English grammar correction assistant. Analyze the following sentence and provide:
+      const prompt = `You are an English grammar correction assistant. Analyze the following sentence:
 
-1. CORRECTED_TEXT: The grammatically correct version of the sentence (simple and concise, remove unnecessary words)
-2. WORD_USAGE: Identify words used incorrectly and explain the correct word type/usage
-3. EXPLANATION: Explain how to make the sentence correct
+"${inputText}"
 
-Input sentence: "${inputText}"
-
-Format your response EXACTLY as follows:
-CORRECTED_TEXT:
-[corrected sentence here]
-
-WORD_USAGE:
-[word usage corrections here]
-
-EXPLANATION:
-[explanation here]`
+Provide:
+1. The grammatically correct version of the sentence (simple and concise, remove unnecessary words)
+2. Identify words used incorrectly and explain the correct word type/usage
+3. Explain how to make the sentence correct`
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash-exp',
-        contents: prompt
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: zodToJsonSchema(correctionSchema)
+        }
       })
+
       const text = response.text || ''
 
       if (!text) {
         throw new Error('No response from API')
       }
 
-      // Parse the response
-      const correctedMatch = text.match(/CORRECTED_TEXT:\s*([\s\S]*?)(?=WORD_USAGE:|$)/)
-      const wordUsageMatch = text.match(/WORD_USAGE:\s*([\s\S]*?)(?=EXPLANATION:|$)/)
-      const explanationMatch = text.match(/EXPLANATION:\s*([\s\S]*)/)
-
-      setResult({
-        correctedText: correctedMatch ? correctedMatch[1].trim() : 'No correction found',
-        wordUsage: wordUsageMatch ? wordUsageMatch[1].trim() : 'No word usage information found',
-        explanation: explanationMatch ? explanationMatch[1].trim() : 'No explanation found'
-      })
+      // Parse and validate the JSON response with Zod
+      const result = correctionSchema.parse(JSON.parse(text))
+      setResult(result)
     } catch (err) {
       setError('Failed to get correction. Please check your API key and try again.')
       console.error(err)
