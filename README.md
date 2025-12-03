@@ -64,6 +64,26 @@ You can generate these icons from any image using online tools like [RealFavicon
 4. Use the checkbox to toggle between detailed and simple view
 5. Copy the corrected text with the copy button
 
+## Deployment
+
+This project includes a GitHub Actions workflow that automatically builds and deploys the app to GitHub Pages.
+
+### Setting Up GitHub Pages
+
+1. Go to your repository settings on GitHub
+2. Navigate to **Pages** in the left sidebar
+3. Under **Source**, select **GitHub Actions**
+4. Push to the `main` or `master` branch to trigger the deployment
+
+The app will be automatically deployed to: `https://luantran069.github.io/happy-english/`
+
+### Manual Deployment
+
+You can also trigger the deployment manually:
+1. Go to the **Actions** tab in your GitHub repository
+2. Select the **Deploy to GitHub Pages** workflow
+3. Click **Run workflow**
+
 ## License
 
 MIT
