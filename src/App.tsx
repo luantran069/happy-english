@@ -6,9 +6,9 @@ import { zodToJsonSchema } from 'zod-to-json-schema'
 
 // Define the schema for grammar correction response
 const correctionSchema = z.object({
-  correctedText: z.string().describe('The grammatically correct version of the sentence (simple and concise, remove unnecessary words)'),
+  correctedText: z.string().describe('The grammatically correct version of the text with all original formatting preserved (line breaks, lists, etc.). Only fix grammar and spelling errors.'),
   wordUsage: z.string().describe('Identify words used incorrectly and explain the correct word type/usage'),
-  explanation: z.string().describe('Explain how to make the sentence correct')
+  explanation: z.string().describe('Explain how to make the text correct')
 })
 
 type CorrectionResult = z.infer<typeof correctionSchema>
@@ -52,7 +52,7 @@ function App() {
 
   const handleCorrect = async () => {
     if (!inputText.trim()) {
-      setError('Please enter a sentence to correct.')
+      setError('Please enter text to correct.')
       return
     }
 
@@ -69,14 +69,14 @@ function App() {
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey })
 
-      const prompt = `You are an English grammar correction assistant. Analyze the following sentence:
+      const prompt = `You are an English grammar correction assistant. Analyze the following text:
 
 "${inputText}"
 
 Provide:
-1. The grammatically correct version of the sentence (simple and concise, remove unnecessary words)
+1. The grammatically correct version of the text. IMPORTANT: Preserve the original formatting exactly, including line breaks, paragraph breaks, bullet points, numbered lists, and any other formatting structures. Only fix grammar and spelling errors - do not restructure, simplify, or remove any formatting.
 2. Identify words used incorrectly and explain the correct word type/usage
-3. Explain how to make the sentence correct`
+3. Explain how to make the text correct`
 
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-lite',
@@ -147,13 +147,13 @@ Provide:
 
       <main className="main">
         <div className="input-section">
-          <label htmlFor="input-text">Enter your sentence:</label>
+          <label htmlFor="input-text">Enter your text:</label>
           <div className="input-group">
             <textarea
               id="input-text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Type or paste your English sentence here..."
+              placeholder="Type or paste your English text here (formatting like line breaks and lists will be preserved)..."
               rows={4}
             />
             <button onClick={handlePaste} className="paste-btn">
