@@ -6,7 +6,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema'
 
 // Define the schema for grammar correction response
 const correctionSchema = z.object({
-  correctedText: z.string().describe('The grammatically correct version of the text with all original formatting preserved (line breaks, lists, etc.). Only fix grammar and spelling errors.'),
+  correctedText: z.string().describe('The grammatically correct version of the text with all original formatting preserved (line breaks, lists, etc.). Only fix grammar and spelling errors - DO NOT change the meaning, tone, or intent of the original text.'),
   wordUsage: z.string().describe('Identify words used incorrectly and explain the correct word type/usage'),
   explanation: z.string().describe('Explain how to make the text correct')
 })
@@ -73,8 +73,15 @@ function App() {
 
 "${inputText}"
 
+CRITICAL INSTRUCTIONS:
+- ONLY correct grammar and spelling errors
+- DO NOT change the meaning of the original sentence
+- DO NOT rephrase or rewrite the content
+- Preserve the original intent, tone, and message exactly as written
+- Preserve the original formatting exactly, including line breaks, paragraph breaks, bullet points, numbered lists, and any other formatting structures
+
 Provide:
-1. The grammatically correct version of the text. IMPORTANT: Preserve the original formatting exactly, including line breaks, paragraph breaks, bullet points, numbered lists, and any other formatting structures. Only fix grammar and spelling errors - do not restructure, simplify, or remove any formatting.
+1. The grammatically correct version of the text with all errors fixed but meaning unchanged
 2. Identify words used incorrectly and explain the correct word type/usage
 3. Explain how to make the text correct`
 
